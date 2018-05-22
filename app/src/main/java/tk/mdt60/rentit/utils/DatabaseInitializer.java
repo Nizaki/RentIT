@@ -27,9 +27,7 @@ public class DatabaseInitializer {
 
     private static void populateWithTestData(AppDatabase db) {
         long tslong = System.currentTimeMillis()/1000;
-        User user = new User();
-        user.setRid(101);
-        user.setTime(String.valueOf(tslong));
+        User user = new User(101,String.valueOf(tslong));
         addUser(db, user);
 
         List<User> userList = db.userDao().getAll();

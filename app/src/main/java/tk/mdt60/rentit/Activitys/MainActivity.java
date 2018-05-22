@@ -1,68 +1,65 @@
 package tk.mdt60.rentit.Activitys;
 
 import android.content.SharedPreferences;
-import android.database.SQLException;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.app.Activity;
 
-import java.io.IOException;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import tk.mdt60.rentit.Module.RoomDetails;
+import tk.mdt60.rentit.Model.DataModel;
 import tk.mdt60.rentit.R;
+import tk.mdt60.rentit.utils.CcAdapter;
 
 public class MainActivity extends AppCompatActivity {
-    private ListView list;
-    private List<RoomDetails> rooms;
-    SharedPreferences prefs = null;
+    ArrayList<DataModel> dataModels;
+    ListView listView;
+    private static CcAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        prefs = getSharedPreferences("tk.mdt60.rentit", MODE_PRIVATE);
-        loadRoom();
-        loadList();
 
-    }
-    private void loadRoom(){
-        rooms = new ArrayList<RoomDetails>();
-        RoomDetails Room = new RoomDetails();
-        RoomDetails Room2 = new RoomDetails();
-        RoomDetails Room3= new RoomDetails();
-        Room.ID = 5567;
-        rooms.add(Room);
-        Room2.ID = 5568;
-        rooms.add(Room2);
-        Room3.ID = 5569;
-        rooms.add(Room3);
-    }
-    private void loadList(){
-        list = (ListView)findViewById(R.id.roomlist);
-        ArrayAdapter<RoomDetails> adapter = new ArrayAdapter<RoomDetails>(this, R.layout.activity_main,rooms){
-            @NonNull
+        listView=(ListView)findViewById(R.id.roomlist);
+        dataModels= new ArrayList<>();
+        dataModels.add(new DataModel("201","Test1"));
+        dataModels.add(new DataModel("202","Test2"));
+        dataModels.add(new DataModel("203","Test3"));
+        dataModels.add(new DataModel("Lab Bone","Test4"));
+        dataModels.add(new DataModel("Lab XXX","Test5"));
+
+        adapter= new CcAdapter(dataModels,getApplicationContext());
+
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-                if(convertView == null){
-                    convertView = getLayoutInflater().inflate(R.layout.roomitem,null);
-                }
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                TextView RoomID = (TextView)convertView.findViewById(R.id.item_room_id);
-                RoomID.setText(String.valueOf(rooms.get(position).ID));
+                DataModel dataModel= dataModels.get(position);
 
-                return convertView;
+                Snackbar.make(view, dataModel.getId()+"\n"+dataModel.getTime()+" API: ", Snackbar.LENGTH_LONG)
+                        .setAction("No action", null).show();
             }
-        };
-        list.setAdapter(adapter);
+        });
     }
 
+    /*
     @Override
     protected void onResume() {
         super.onResume();
@@ -73,5 +70,24 @@ public class MainActivity extends AppCompatActivity {
             //prefs.edit().putBoolean("firstrun", false).commit();
         }
     }
+    */
+    /**
+     *     Save and get ArrayList in SharedPreference
+     */
+    public void saveArrayList(ArrayList<String> list, String key){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(list);
+        editor.putString(key, json);
+        editor.apply();     // This line is IMPORTANT !!!
+    }
 
+    public ArrayList<String> getArrayList(String key){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Gson gson = new Gson();
+        String json = prefs.getString(key, null);
+        Type type = new TypeToken<ArrayList<String>>() {}.getType();
+        return gson.fromJson(json, type);
+    }
 }

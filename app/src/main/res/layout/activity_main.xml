@@ -6,9 +6,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".Activitys.MainActivity">
-    <TextView
-        android:text="OMG"
-        android:textSize="99dp"
+    <Button
+        android:text="add list item"
+        android:id="@+id/btnTest"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
     <ListView

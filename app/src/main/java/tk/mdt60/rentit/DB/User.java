@@ -9,6 +9,12 @@ public class User {
     @PrimaryKey @NonNull
     private int rid;
     private String time;
+
+    public User(int rid,String time){
+        this.rid = rid;
+        this.time = time;
+    }
+
     public int getRid(){return rid;}
 
     public String getTime(){return time;}
