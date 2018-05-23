@@ -11,6 +11,8 @@ public class MainApplication extends Application {
     public void onCreate() {
         super.onCreate();
         Toast.makeText(this,"GGEZ",Toast.LENGTH_LONG).show();
+        //Fist run
+
     }
 
     public  static MainApplication getmContext(){
