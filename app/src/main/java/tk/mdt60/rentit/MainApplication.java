@@ -10,7 +10,6 @@ public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        Toast.makeText(this,"GGEZ",Toast.LENGTH_LONG).show();
         //Fist run
 
     }
