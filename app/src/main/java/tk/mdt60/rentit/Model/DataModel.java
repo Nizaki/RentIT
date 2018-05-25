@@ -8,11 +8,11 @@ public class DataModel {
     int hour;
     int miniute;
 
-    public DataModel(String id, String status, int hour, int miniute) {
+    public DataModel(String id, String status, int hour, int minute) {
         this.id = id;
         this.status = status;
         this.hour = hour;
-        this.miniute = miniute;
+        this.miniute = minute;
     }
 
     public String getId() {

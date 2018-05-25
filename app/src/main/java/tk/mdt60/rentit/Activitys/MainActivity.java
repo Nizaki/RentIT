@@ -2,6 +2,8 @@ package tk.mdt60.rentit.Activitys;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -41,36 +43,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         Calendar c = Calendar.getInstance();
-
-        int Hr24=c.get(Calendar.HOUR_OF_DAY);
-        int Min=c.get(Calendar.MINUTE);
-        Toast.makeText(this,"Time: "+Hr24+Min,Toast.LENGTH_LONG).show();
         listView = (ListView) findViewById(R.id.roomlist);
-        sRefresh =(SwipeRefreshLayout)findViewById(R.id.swiperefresh);
+        sRefresh = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
         dataModels = new ArrayList<>();
-        SharedPreferences prefs = null;
-        prefs = getSharedPreferences("tk.mdt60.rentit", MODE_PRIVATE);
-        if (prefs.getBoolean("firstrun", false)) {
-            fRun();
-            prefs.edit().putBoolean("firstrun", true).commit();
-            saveData();
-        }
-
-
-        loadData();
-        adapter = new CcAdapter(dataModels, getApplicationContext());
-
+        fRun();
+        adapter = new CcAdapter(dataModels, this);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.wtf("Debug", "Why not appear wtf");
                 DataModel dataModel = dataModels.get(position);
-
-                Snackbar.make(view, dataModel.getId() + "\n Time : " + dataModel.getHour() + dataModel.getMiniute(), Snackbar.LENGTH_LONG)
-                        .setAction("No action", null).show();
             }
         });
 
@@ -84,36 +68,56 @@ public class MainActivity extends AppCompatActivity {
     private  void updateListview(){
         adapter.notifyDataSetChanged();
         sRefresh.setRefreshing(false);
-    }
-    private void fRun() {
-        dataModels.clear();
-        try {
-            def = sdf.parse("00:00");
-        } catch (ParseException e) {
-        }
-        sdataModels.add(new DataModel("201", "Test1", 0,0));
-        sdataModels.add(new DataModel("202", "Test2", 0,0));
-        sdataModels.add(new DataModel("203", "Test3", 0,0));
-        sdataModels.add(new DataModel("Lab Bone", "Test4", 0,0));
-        sdataModels.add(new DataModel("Lab XXX", "Test5", 0,0));
+        saveData();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        saveData();
+    }
+
+    private void fRun() {
+        SharedPreferences prefs = null;
+        prefs = getSharedPreferences("tk.mdt60.rentit", MODE_PRIVATE);
+        if (prefs.getBoolean("firstrun", true)) {
+            prefs.edit().putBoolean("firstrun", false).apply();
+            Log.d("Debug", "fRun: Detect");
+            addRoom("LAB1");
+            addRoom("201");
+            addRoom("202");
+            addRoom("203");
+            addRoom("204");
+            addRoom("205");
+            addRoom("301");
+            addRoom("302");
+            saveData();
+            loadData();
+        }
+        else {
+            Log.d("Debug", "fRun: Load Data");
+            loadData();
+        }
+    }
+    public void addRoom(String id){
+        dataModels.add(new DataModel(id,"use",0,0));
+    }
     /**
      * Save and get ArrayList in SharedPreference
      **/
 
     private void saveData() {
-        SharedPreferences sp = getSharedPreferences("test", MODE_PRIVATE);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sp.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(sdataModels);
+        String json = gson.toJson(dataModels);
         editor.putString("example", json);
         editor.apply();
 
     }
 
     private void loadData() {
-        SharedPreferences sp = getSharedPreferences("test", MODE_PRIVATE);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         Gson gson = new Gson();
         String json = sp.getString("example", null);
         Type type = new TypeToken<ArrayList<DataModel>>() {
